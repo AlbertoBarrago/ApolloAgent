@@ -102,7 +102,7 @@ class ApolloAgent:
                 save_user_history_to_json(message=user_input, role="user")
 
                 prompt = (
-                    f"Follow this instructions:{ Constant.prompt_reinforcement_dev_v2}"
+                    f"Follow this instructions:{Constant.prompt_reinforcement_dev_v2}"
                     f" The command is: ${user_input}"
                 )
                 # The magic begin

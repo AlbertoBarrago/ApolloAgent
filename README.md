@@ -16,6 +16,34 @@ ApolloAgent provides the following functionality:
 - **File Operations**: Delete and edit files directly through the agent.
 - **Session**: Each session is stored in a separate file inside the chat_sessions folder 
 
+
+## Conversation example 
+
+```text
+> You: Howdy who are you?
+
+🤖 [9 seconds, 98 ms] Ciao! I'm Apollo, your AI pair-programming assistant. I'm from Cagliari, Italy, and my creator is Alberto Barrago. How can I help you today? What's on your mind?
+
+> You: what's the Cagliari weather today?                                                       
+
+[11 seconds, 98 ms], Tools used: ['web_search']
+
+
+🤖 [19 seconds, 651 ms] The current weather in Cagliari is partly cloudy with a high of 23°C (73°F) and a low of 17°C (63°F). There is no precipitation expected today. However, there may be some scattered showers in the evening.
+
+Here's a summary of the weather forecast for the next 10 days:
+
+* Today: Partly cloudy with a high of 23°C (73°F) and a low of 17°C (63°F)
+* Tomorrow: Sunny with a high of 25°C (77°F) and a low of 18°C (64°F)
+* Wednesday: Mostly sunny with a high of 27°C (81°F) and a low of 20°C (68°F)
+* Thursday: Partly cloudy with a high of 24°C (75°F) and a low of 19°C (66°F)
+* Friday: Scattered showers with a high of 22°C (72°F) and a low of 17°C (63°F)
+
+It's recommended to pack light clothing for the next few days, but also bring an umbrella in case of scattered showers.
+
+Please note that this is just a summary of the weather forecast, and you should check the latest updates before making any plans.
+```
+
 ## Installation
 
 Ensure you have Python 3.10+ installed.

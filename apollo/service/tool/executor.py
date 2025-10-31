@@ -13,6 +13,7 @@ import json
 
 from typing import Any, Dict, Callable
 
+
 def _format_tool_result(result) -> str:
     """
     Format the tool execution result into a string that can be sent to LLM.

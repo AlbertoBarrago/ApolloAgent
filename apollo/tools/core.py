@@ -145,7 +145,11 @@ class ApolloCore:
             messages=self.chat_history,
             tools=get_available_tools(),
             stream=True,
-            options={},
+            options={
+                "temperature": 0.7, # Good balance through creativity and coherence
+                "num_predict": 2048,
+                "timeout": 60,
+            },
         )
 
         return llm_response_stream

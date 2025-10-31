@@ -9,6 +9,8 @@ License: BSD 3-Clause License - 2025
 """
 
 import inspect
+import json
+
 from typing import Any, Dict, Callable
 
 def _format_tool_result(result) -> str:
@@ -21,7 +23,6 @@ def _format_tool_result(result) -> str:
     Returns:
         Formatted string representation of the result
     """
-    import json
 
     if result is None:
         return "Tool executed successfully with no return value."
@@ -45,9 +46,9 @@ def _format_tool_result(result) -> str:
                         f"   Snippet: {item.get('snippet', 'No snippet')}\n"
                     )
             return "\n".join(formatted)
-        else:
-            # Generic list, convert to JSON
-            return json.dumps(result, indent=2, ensure_ascii=False)
+
+        # Generic list, convert to JSON
+        return json.dumps(result, indent=2, ensure_ascii=False)
 
     # If it's a dict, convert to JSON
     if isinstance(result, dict):
@@ -166,7 +167,6 @@ class ToolExecutor:
             else:
                 result = func(**args_to_pass)
 
-            # ✅ FORMAT THE RESULT PROPERLY
             return _format_tool_result(result)
 
         except Exception as e:

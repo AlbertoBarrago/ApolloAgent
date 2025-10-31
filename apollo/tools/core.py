@@ -264,7 +264,7 @@ class ApolloCore:
                 result, current_tool_calls = await self._handle_tool_calls(
                     tool_calls, iterations, recent_tool_calls
                 )
-                # print(f"\n[{duration_str}], Tools used: {current_tool_calls}\n") # Already printed
+                print(f"\n[{duration_str}], Tools used: {current_tool_calls}\n")
                 if result:
                     return result
                 recent_tool_calls = current_tool_calls

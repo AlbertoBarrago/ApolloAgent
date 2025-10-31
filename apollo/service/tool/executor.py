@@ -11,6 +11,54 @@ License: BSD 3-Clause License - 2025
 import inspect
 from typing import Any, Dict, Callable
 
+def _format_tool_result(result) -> str:
+    """
+    Format the tool execution result into a string that can be sent to LLM.
+
+    Args:
+        result: The raw result from tool execution
+
+    Returns:
+        Formatted string representation of the result
+    """
+    import json
+
+    if result is None:
+        return "Tool executed successfully with no return value."
+
+    # If it's already a string, return it
+    if isinstance(result, str):
+        return result
+
+    # If it's a list of dicts (like wiki_search results), format nicely
+    if isinstance(result, list):
+        if all(isinstance(item, dict) for item in result):
+            # Format as readable text for wiki results
+            formatted = []
+            for i, item in enumerate(result, 1):
+                if "error" in item:
+                    formatted.append(f"Error: {item.get('error')}")
+                else:
+                    formatted.append(
+                        f"{i}. {item.get('title', 'No title')}\n"
+                        f"   URL: {item.get('url', 'No URL')}\n"
+                        f"   Snippet: {item.get('snippet', 'No snippet')}\n"
+                    )
+            return "\n".join(formatted)
+        else:
+            # Generic list, convert to JSON
+            return json.dumps(result, indent=2, ensure_ascii=False)
+
+    # If it's a dict, convert to JSON
+    if isinstance(result, dict):
+        return json.dumps(result, indent=2, ensure_ascii=False)
+
+    # For other types, convert to string
+    try:
+        return str(result)
+    except Exception:
+        return f"[Result type: {type(result).__name__}]"
+
 
 class ToolExecutor:
     """
@@ -58,7 +106,7 @@ class ToolExecutor:
             tool_call: The tool call from the LLM.
 
         Returns:
-            The result of the tool execution.
+            The result of the tool execution (properly formatted as string).
         """
 
         def filter_valid_args(valid_func, args_dict):
@@ -67,6 +115,7 @@ class ToolExecutor:
             ]
             return {k: v for k, v in args_dict.items() if k in valid_params}
 
+        # Parse tool call
         try:
             if hasattr(tool_call, "function"):
                 func_name = getattr(tool_call.function, "name", None)
@@ -80,19 +129,26 @@ class ToolExecutor:
             if not func_name:
                 return "[ERROR] Function name not provided in tool call."
 
+            # Parse arguments
             if isinstance(raw_args, str):
                 arguments_dict = __import__("json").loads(raw_args)
             elif isinstance(raw_args, dict):
                 arguments_dict = raw_args
             else:
                 return f"[ERROR] Unsupported arguments type: {type(raw_args)}"
-        except RuntimeError as e:
+
+            if not isinstance(arguments_dict, dict):
+                return "[ERROR] Parsed arguments are not a dictionary."
+
+        except Exception as e:
             return f"[ERROR] Failed to parse tool call: {e}"
 
+        # Get function
         func = self.available_functions.get(func_name)
         if not func:
             return f"[ERROR] Function '{func_name}' not found."
 
+        # Filter and prepare arguments
         filtered_args = filter_valid_args(func, arguments_dict)
 
         sig = inspect.signature(func)
@@ -100,18 +156,18 @@ class ToolExecutor:
 
         args_to_pass = filtered_args.copy()
 
-        if (
-            "agent" in params
-        ):  # Check if the tool function explicitly accepts an 'agent' parameter
-            # If the tool function expects 'agent', pass the ToolExecutor instance itself.
-            # This makes the ToolExecutor the "agent" for the tool.
+        if "agent" in params:
             args_to_pass["agent"] = self
 
+        # Execute function
         try:
             if inspect.iscoroutinefunction(func):
                 result = await func(**args_to_pass)
             else:
                 result = func(**args_to_pass)
-            return result
-        except RuntimeError as e:
+
+            # ✅ FORMAT THE RESULT PROPERLY
+            return _format_tool_result(result)
+
+        except Exception as e:
             return f"[ERROR] Failed to execute tool: {e}"
